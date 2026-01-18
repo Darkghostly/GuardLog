@@ -1,4 +1,7 @@
 import re
+import json
+import os
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from config import LOG_FILE, MAX_FAILED_ATTEMPTS, FAILED_LOGINS_PATTERNS, TIME_WINDOW_SECONDS
@@ -63,6 +66,27 @@ def detect_failed_logins_by_ip():
 
     return attempts_by_ip
 
+
+def generate_json_report(alerts):
+    os.makedirs("alerts", exist_ok=True)
+
+    report = []
+
+    for ip, times in alerts.items():
+        entry = {
+            "ip": ip,
+            "failed_attempts": len(times),
+            "first_seen": times[0].strftime("%Y-%m-%d %H:%M:%S"),
+            "last_seen": times[-1].strftime("%Y-%m-%d %H:%M:%S"),
+            "window_seconds": (times[-1] - times[0]).seconds,
+            "alert_type": "SSH Bruteforce"
+        }
+        report.append(entry)
+
+    with open("alerts/alerts.json", "w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4)
+
+
 if __name__ == "__main__":
     print("[GuardLog] Monitor iniciado")
 
@@ -74,4 +98,9 @@ if __name__ == "__main__":
         print(f"Tentativas: {len(times)}")
         print(f"Janela: {(times[-1] - times[0]).seconds} segundos")
 
+    if alerts:
+        generate_json_report(alerts)
+        print("[GuardLog] Relatório de alertas gerado em alerts/alerts.json")
+    else:
+        print("[GuardLog] Nenhuma ameaça detectada")
 
