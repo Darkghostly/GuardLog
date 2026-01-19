@@ -5,30 +5,39 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 🎯 Sobre o Projeto
-O GuardLog é um script de monitoramento de segurança desenvolvido em Python para automatizar a análise de registros de autenticação em servidores Linux.
+O GuardLog é um projeto educacional em Python voltado para análise de logs de autenticação com foco em detecção de ataques de força bruta (Brute Force).
 
-O foco principal é a detecção preventiva de ataques de Brute Force. O script processa arquivos de log, identifica padrões de falha e alerta o administrador quando o volume de tentativas suspeitas ultrapassa um limite de segurança pré-configurado. Este é um projeto prático focado no pilar de monitoramento contínuo da cultura DevSecOps.
+O script processa arquivos de log de autenticação (como auth.log), identifica padrões suspeitos de falhas de login utilizando expressões regulares e gera alertas quando um limite de segurança é ultrapassado dentro de uma janela de tempo definida.
+
+Este projeto simula conceitos utilizados em monitoramento de segurança, Blue Team e SIEM, com foco em aprendizado prático e progressivo.
 
 ## ⚙️ Arquitetura do Sistema
-O projeto foi estruturado para ser modular e de fácil configuração:
+O projeto foi desenvolvido de forma modular, facilitando manutenção e evolução.
 
-### 1. Configuração (config.py)
-Centralização de parâmetros globais.
+### 🔧 1. Arquivo de Configuração (config.py)
+
+Responsável por centralizar os parâmetros do sistema.
 
 Variáveis configuráveis:
 
-Caminho do arquivo de log (LOG_FILE).
+LOG_FILE: caminho do arquivo de log analisado
 
-Limite máximo de tentativas falhas antes do alerta (MAX_FAILED_ATTEMPTS).
+MAX_FAILED_ATTEMPTS: limite de falhas antes do alerta
 
-Definição de padrões de falha via Expressões Regulares (Regex).
+TIME_WINDOW_SECONDS: intervalo de tempo analisado
+
+FAILED_LOGINS_PATTERNS: padrões Regex de falha de autenticação
+
 
 ### 2. Monitoramento e Análise (monitor.py)
-Leitura Eficiente: O script percorre o arquivo de log linha por linha.
 
-Pattern Matching: Utiliza a biblioteca re do Python para buscar padrões específicos de erro (ex: Failed password ou invalid user) definidos no arquivo de configuração.
+Avaliação de ataques por volume dentro de uma janela de tempo
 
-Contabilização: Gerencia um contador em tempo real das ocorrências detectadas.
+O script percorre o arquivo de log linha por linha.
+
+Utiliza a biblioteca re do Python para buscar padrões específicos de erro (ex: Failed password ou invalid user) definidos no arquivo de configuração.
+
+Gerencia um contador em tempo real das ocorrências detectadas.
 
 ### 3. Alerta de Segurança
 Compara o total de falhas encontradas com o limite de segurança.
@@ -67,12 +76,10 @@ python monitor.py
 Abaixo, a lógica utilizada para filtrar as tentativas de login falhas através dos logs:
 
 ```Python
-
-# Lógica de detecção via Regex
 for line in file:
     for pattern in FAILED_LOGINS_PATTERNS:
         if re.search(pattern, line):
-            failed_attempts += 1
+            failed_attempts.append(timestamp)
             break
 
 ```
@@ -81,9 +88,8 @@ for line in file:
 ## 📊 Exemplo de Log Processado
 O sistema é capaz de identificar entradas como estas presentes no auth.log:
 
-Failed password for invalid user admin from 192.168.0.10 port 22
-
-Failed password for root from 192.168.0.10 port 22
+2026-01-18 14:01:11 Failed password for invalid user admin from 192.168.0.10 port 22 <br>
+2026-01-18 14:01:12 Failed password for root from 192.168.0.10 port 22
 
 ## 👤 Autor
 **Gustavo Bueno da Silva**
@@ -93,3 +99,4 @@ Failed password for root from 192.168.0.10 port 22
 * [GitHub](https://github.com/Darkghostly)
 
 ---
+
